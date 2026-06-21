@@ -1,0 +1,39 @@
+{
+  "name": "pokemon",
+  "version": "1.0.0",
+  "description": "��#\u0000 \u0000P\u0000o\u0000k\u0000e\u0000m\u0000o\u0000n\u0000 \u0000C\u0000a\u0000r\u0000d\u0000 \u0000S\u0000t\u0000o\u0000r\u0000e\u0000\r\u0000 \u0000",
+  "main": "index.js",
+  "scripts": {
+    "start": "node backend/server.js",
+    "dev": "nodemon backend/server.js",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "test": "jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Priyesh-2003/pokeshop.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Priyesh-2003/pokeshop/issues"
+  },
+  "homepage": "https://github.com/Priyesh-2003/pokeshop#readme",
+  "dependencies": {
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "mongoose": "^9.7.1"
+  },
+  "devDependencies": {
+    "eslint": "^10.5.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-prettier": "^5.5.6",
+    "jest": "^30.4.2",
+    "nodemon": "^3.1.14",
+    "prettier": "^3.8.4",
+    "supertest": "^7.2.2"
+  }
+}
