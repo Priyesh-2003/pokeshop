@@ -1,5 +1,11 @@
 const API_URL = "/api/cards"; // relative path — works when Express serves this folder + the API on the same origin
 
+// Helper to get auth headers if token is stored in localStorage
+function getAuthHeaders() {
+  const token = localStorage.getItem('token');
+  return token ? { Authorization: `Bearer ${token}` } : {};
+}
+
 const form = document.getElementById("cardForm");
 const formTitle = document.getElementById("form-title");
 const submitBtn = document.getElementById("submitBtn");
@@ -26,7 +32,7 @@ function escapeHtml(str) {
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;");
 }
-
+// on successfull fething of card details by loadcards, rendercards is being passed on the card details 
 function renderCards(cards) {
   if (!cards.length) {
     cardGrid.innerHTML = `<p class="empty-state">No cards yet — add your first one to the left.</p>`;
@@ -68,9 +74,8 @@ function closeAllMenus() {
   document.querySelectorAll(".card-menu.open").forEach((m) => m.classList.remove("open"));
 }
 
-// Fetches the list, then removes (from the DB, not just the screen) any card
-// that's at zero stock — covers both "bought the last one" and "manually edited
-// stock down to 0" cases, so out-of-stock cards never linger in view.
+// this code sends get request using fetch to the URL and expects a response.
+// stores the response in js object format in cards and stores fruther the card details in instock (after validation)
 async function loadCards() {
   try {
     const res = await fetch(API_URL);
@@ -83,7 +88,7 @@ async function loadCards() {
     if (outOfStock.length) {
       await Promise.all(
         outOfStock.map((c) =>
-          fetch(`${API_URL}/${c._id}`, { method: "DELETE" }).catch(() => {
+          fetch(`${API_URL}/${c._id}`, { method: "DELETE", headers: { ...getAuthHeaders() } }).catch(() => {
             // best-effort cleanup — if one delete fails, it'll just get retried on next load
           })
         )
@@ -135,7 +140,7 @@ cancelEditBtn.addEventListener("click", () => {
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
 
-  const data = new FormData(form);
+  const data = new FormData(form); // standard form function to extract form data 
   const payload = {
     name: data.get("name").trim(),
     type: data.get("type").trim(),
@@ -159,7 +164,7 @@ form.addEventListener("submit", async (e) => {
   try {
     const res = await fetch(url, {
       method,
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", ...getAuthHeaders() },
       body: JSON.stringify(payload)
     });
 
@@ -186,7 +191,7 @@ async function handleDelete(id, name) {
   setMessage(listMessage, "Deleting…", "");
 
   try {
-    const res = await fetch(`${API_URL}/${id}`, { method: "DELETE" });
+    const res = await fetch(`${API_URL}/${id}`, { method: "DELETE", headers: { ...getAuthHeaders() } });
 
     if (!res.ok) {
       const errBody = await res.json().catch(() => ({}));
@@ -218,10 +223,10 @@ async function handleBuy(id, buyBtn) {
 
   try {
     const res = isLastOne
-      ? await fetch(`${API_URL}/${id}`, { method: "DELETE" })
+      ? await fetch(`${API_URL}/${id}`, { method: "DELETE", headers: { ...getAuthHeaders() } })
       : await fetch(`${API_URL}/${id}`, {
           method: "PUT",
-          headers: { "Content-Type": "application/json" },
+          headers: { "Content-Type": "application/json", ...getAuthHeaders() },
           body: JSON.stringify({
             name: card.name,
             type: card.type,
@@ -287,3 +292,6 @@ cardGrid.addEventListener("click", (e) => {
 document.addEventListener("click", closeAllMenus);
 
 loadCards();
+
+
+

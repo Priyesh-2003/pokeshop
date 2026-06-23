@@ -1,12 +1,13 @@
 // backend/routes/cardRoutes.js
 const express = require('express');
 const router = express.Router();
-const Card = require('../models/card');   // ← import the model
+const Card = require('../models/card');
+const requireAuth = require('../middleware/auth');
 
-// POST /api/cards   →   add a new Pokémon card
-router.post('/', async (req, res) => {
+// POST /api/cards   →   add a new Pokémon card (requires login)
+router.post('/', requireAuth, async (req, res) => {
   try {
-    const newCard = await Card.create(req.body);   // body should match the schema
+    const newCard = await Card.create(req.body);
     res.status(201).json(newCard);
   } catch (err) {
     console.error(' Error creating card:', err);
@@ -14,13 +15,13 @@ router.post('/', async (req, res) => {
   }
 });
 
-// PUT /api/cards/:id   →   update an existing card
-router.put('/:id', async (req, res) => {
+// PUT /api/cards/:id   →   update an existing card (requires login)
+router.put('/:id', requireAuth, async (req, res) => {
   try {
     const updatedCard = await Card.findByIdAndUpdate(
       req.params.id,
       req.body,
-      { new: true, runValidators: true } // return the updated doc, re-check schema rules
+      { new: true, runValidators: true }
     );
 
     if (!updatedCard) {
@@ -34,8 +35,8 @@ router.put('/:id', async (req, res) => {
   }
 });
 
-// DELETE /api/cards/:id   →   remove a card
-router.delete('/:id', async (req, res) => {
+// DELETE /api/cards/:id   →   remove a card (requires login)
+router.delete('/:id', requireAuth, async (req, res) => {
   try {
     const deletedCard = await Card.findByIdAndDelete(req.params.id);
 
@@ -50,30 +51,29 @@ router.delete('/:id', async (req, res) => {
   }
 });
 
-// GET /api/cards/:id
+// GET /api/cards/:id   →   public, anyone can view a single card
 router.get('/:id', async (req, res) => {
   try {
     const card = await Card.findById(req.params.id);
 
     if (!card) {
-      return res.status(404).json({
-        message: 'Card not found'
-      });
+      return res.status(404).json({ message: 'Card not found' });
     }
 
     res.json(card);
-
   } catch (err) {
-    res.status(500).json({
-      error: err.message
-    });
+    res.status(500).json({ error: err.message });
   }
 });
 
-// (Optional) GET all cards – handy for testing
-router.get('/', async (_, res) => {
-  const cards = await Card.find();
-  res.json(cards);
+// GET /api/cards   →   public, anyone can browse the list
+router.get('/', async (req, res) => {
+  try {
+    const cards = await Card.find();
+    res.json(cards);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
 module.exports = router;
