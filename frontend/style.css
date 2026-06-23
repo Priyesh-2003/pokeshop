@@ -16,7 +16,9 @@
   --font-mono: "JetBrains Mono", monospace;
 }
 
-* { box-sizing: border-box; }
+* {
+  box-sizing: border-box;
+}
 
 body {
   margin: 0;
@@ -64,7 +66,9 @@ body {
 }
 
 @media (max-width: 800px) {
-  .layout { grid-template-columns: 1fr; }
+  .layout {
+    grid-template-columns: 1fr;
+  }
 }
 
 .panel {
@@ -101,7 +105,7 @@ body {
   color: var(--parchment);
   font-family: var(--font-body);
   font-size: 0.9rem;
-  width: 100%; 
+  width: 100%;
 }
 
 .field input:focus-visible {
@@ -114,12 +118,18 @@ body {
   gap: 0.75rem;
 }
 
-.field-row .field { flex: 1;
-min-width: 0;  
+.field-row .field {
+  flex: 1;
+  min-width: 0;
+}
+
+.form-actions {
+  display: flex;
+  gap: 0.6rem;
 }
 
 #submitBtn {
-  width: 100%;
+  flex: 1;
   padding: 0.65rem;
   border: none;
   border-radius: 8px;
@@ -132,8 +142,29 @@ min-width: 0;
   transition: opacity 0.2s ease;
 }
 
-#submitBtn:hover { opacity: 0.9; }
-#submitBtn:disabled { opacity: 0.5; cursor: not-allowed; }
+#submitBtn:hover {
+  opacity: 0.9;
+}
+
+#submitBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.cancel-btn {
+  padding: 0.65rem 1rem;
+  border: 1px solid rgba(244, 236, 217, 0.25);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--parchment);
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.cancel-btn:hover {
+  background: rgba(244, 236, 217, 0.08);
+}
 
 .form-message {
   min-height: 1.2em;
@@ -141,8 +172,17 @@ min-width: 0;
   margin: 0.6rem 0 0;
 }
 
-.form-message.success { color: #7bc97e; }
-.form-message.error { color: #e1572c; }
+.form-message.success {
+  color: #7bc97e;
+}
+
+.form-message.error {
+  color: #e1572c;
+}
+
+#listMessage {
+  margin: -0.5rem 0 1rem;
+}
 
 /* ===== Card grid ===== */
 .card-grid {
@@ -159,6 +199,7 @@ min-width: 0;
 
 .card {
   --type-color: var(--default-type);
+  position: relative;
   border: 2px solid var(--type-color);
   border-radius: 12px;
   padding: 0.9rem;
@@ -170,6 +211,8 @@ min-width: 0;
   justify-content: space-between;
   align-items: baseline;
   margin-bottom: 0.4rem;
+  padding-right: 1.6rem;
+  /* leaves room for the kebab button */
 }
 
 .card-name {
@@ -203,4 +246,93 @@ min-width: 0;
   color: rgba(244, 236, 217, 0.65);
   display: flex;
   justify-content: space-between;
+}
+
+/* ===== Buy now button ===== */
+.buy-btn {
+  width: 100%;
+  margin-top: 0.75rem;
+  padding: 0.5rem;
+  border: none;
+  border-radius: 8px;
+  background: var(--type-color);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+
+.buy-btn:hover:not(:disabled) {
+  opacity: 0.85;
+}
+
+.buy-btn:disabled {
+  background: var(--default-type);
+  color: rgba(244, 236, 217, 0.6);
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* ===== Card kebab menu (Edit / Delete) ===== */
+.card-menu-wrap {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+}
+
+.card-menu-btn {
+  background: transparent;
+  border: none;
+  color: var(--parchment);
+  font-size: 1.1rem;
+  line-height: 1;
+  padding: 2px 7px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.card-menu-btn:hover,
+.card-menu-btn:focus-visible {
+  background: rgba(244, 236, 217, 0.1);
+  outline: none;
+}
+
+.card-menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  min-width: 110px;
+  background: var(--ink);
+  border: 1px solid rgba(244, 236, 217, 0.15);
+  border-radius: 8px;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.45);
+  display: none;
+  flex-direction: column;
+  overflow: hidden;
+  z-index: 5;
+}
+
+.card-menu.open {
+  display: flex;
+}
+
+.card-menu button {
+  background: none;
+  border: none;
+  color: var(--parchment);
+  text-align: left;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.8rem;
+  font-family: var(--font-body);
+  cursor: pointer;
+}
+
+.card-menu button:hover {
+  background: rgba(244, 236, 217, 0.08);
+}
+
+.card-menu button.danger {
+  color: var(--fire);
 }
