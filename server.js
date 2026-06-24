@@ -29,10 +29,13 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'frontend', 'login.html'));
 });
 
+const authRoutes =
+  require('./backend/routes/authRoutes');
+app.use('/api/auth', authRoutes);
 // 5️⃣ Serve all static frontend files
 app.use(express.static(path.join(__dirname, 'frontend')));
 
 // 5️⃣ Start the server
-app.listen(PORT, () => {  
+app.listen(PORT, () => {
   console.log(`Server listening on http://localhost:${PORT}`);
 });

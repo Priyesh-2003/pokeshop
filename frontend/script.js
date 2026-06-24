@@ -77,7 +77,7 @@ async function loadCards() {
     if (outOfStock.length) {
       await Promise.all(
         outOfStock.map((c) =>
-          fetch(`${API_URL}/${c._id}`, { method: "DELETE" }).catch(() => {})
+          fetch(`${API_URL}/${c._id}`, { method: "DELETE" }).catch(() => { })
         )
       );
     }
@@ -210,16 +210,16 @@ async function handleBuy(id, buyBtn) {
     const res = isLastOne
       ? await fetch(`${API_URL}/${id}`, { method: "DELETE" })
       : await fetch(`${API_URL}/${id}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            name: card.name,
-            type: card.type,
-            rarity: card.rarity,
-            price: card.price,
-            stock: newStock
-          })
-        });
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: card.name,
+          type: card.type,
+          rarity: card.rarity,
+          price: card.price,
+          stock: newStock
+        })
+      });
 
     if (!res.ok) {
       const errBody = await res.json().catch(() => ({}));
