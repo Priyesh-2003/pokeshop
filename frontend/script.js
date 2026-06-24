@@ -1,11 +1,5 @@
 const API_URL = "/api/cards"; // relative path — works when Express serves this folder + the API on the same origin
 
-// Helper to get auth headers if token is stored in localStorage
-function getAuthHeaders() {
-  const token = localStorage.getItem('token');
-  return token ? { Authorization: `Bearer ${token}` } : {};
-}
-
 const form = document.getElementById("cardForm");
 const formTitle = document.getElementById("form-title");
 const submitBtn = document.getElementById("submitBtn");
@@ -17,9 +11,6 @@ const cardGrid = document.getElementById("cardGrid");
 let cardsCache = [];   // last loaded list, so Edit/Buy can look up a card's data by id
 let editingId = null;  // null = "adding a new card", otherwise = id being edited
 
-// Maps a card's "type" string to one of the accent colors defined in style.css.
-// Falls back to a neutral color for anything not in the list (since the schema
-// allows any free-text type).
 function typeColorVar(type) {
   const known = ["fire", "water", "electric", "grass", "psychic"];
   const normalized = (type || "").toLowerCase();
@@ -32,7 +23,7 @@ function escapeHtml(str) {
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;");
 }
-// on successfull fething of card details by loadcards, rendercards is being passed on the card details 
+
 function renderCards(cards) {
   if (!cards.length) {
     cardGrid.innerHTML = `<p class="empty-state">No cards yet — add your first one to the left.</p>`;
@@ -74,8 +65,6 @@ function closeAllMenus() {
   document.querySelectorAll(".card-menu.open").forEach((m) => m.classList.remove("open"));
 }
 
-// this code sends get request using fetch to the URL and expects a response.
-// stores the response in js object format in cards and stores fruther the card details in instock (after validation)
 async function loadCards() {
   try {
     const res = await fetch(API_URL);
@@ -88,9 +77,7 @@ async function loadCards() {
     if (outOfStock.length) {
       await Promise.all(
         outOfStock.map((c) =>
-          fetch(`${API_URL}/${c._id}`, { method: "DELETE", headers: { ...getAuthHeaders() } }).catch(() => {
-            // best-effort cleanup — if one delete fails, it'll just get retried on next load
-          })
+          fetch(`${API_URL}/${c._id}`, { method: "DELETE" }).catch(() => {})
         )
       );
     }
@@ -140,7 +127,7 @@ cancelEditBtn.addEventListener("click", () => {
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
 
-  const data = new FormData(form); // standard form function to extract form data 
+  const data = new FormData(form);
   const payload = {
     name: data.get("name").trim(),
     type: data.get("type").trim(),
@@ -164,7 +151,7 @@ form.addEventListener("submit", async (e) => {
   try {
     const res = await fetch(url, {
       method,
-      headers: { "Content-Type": "application/json", ...getAuthHeaders() },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload)
     });
 
@@ -175,7 +162,7 @@ form.addEventListener("submit", async (e) => {
 
     exitEdit();
     setMessage(formMessage, isEditing ? "Card updated." : "Card added.", "success");
-    loadCards(); // refresh the list — also auto-removes it if it was edited down to 0 stock
+    loadCards();
   } catch (err) {
     setMessage(formMessage, `Couldn't ${isEditing ? "update" : "add"} card: ${err.message}`, "error");
   } finally {
@@ -191,7 +178,7 @@ async function handleDelete(id, name) {
   setMessage(listMessage, "Deleting…", "");
 
   try {
-    const res = await fetch(`${API_URL}/${id}`, { method: "DELETE", headers: { ...getAuthHeaders() } });
+    const res = await fetch(`${API_URL}/${id}`, { method: "DELETE" });
 
     if (!res.ok) {
       const errBody = await res.json().catch(() => ({}));
@@ -208,8 +195,6 @@ async function handleDelete(id, name) {
 }
 
 // ===== Buy now =====
-// If this purchase would bring stock to 0, the card is deleted outright instead
-// of being updated to a 0-stock record — so sold-out cards disappear immediately.
 async function handleBuy(id, buyBtn) {
   const card = cardsCache.find((c) => c._id === id);
   if (!card || (card.stock ?? 0) <= 0) return;
@@ -223,10 +208,10 @@ async function handleBuy(id, buyBtn) {
 
   try {
     const res = isLastOne
-      ? await fetch(`${API_URL}/${id}`, { method: "DELETE", headers: { ...getAuthHeaders() } })
+      ? await fetch(`${API_URL}/${id}`, { method: "DELETE" })
       : await fetch(`${API_URL}/${id}`, {
           method: "PUT",
-          headers: { "Content-Type": "application/json", ...getAuthHeaders() },
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             name: card.name,
             type: card.type,
@@ -258,7 +243,7 @@ async function handleBuy(id, buyBtn) {
 cardGrid.addEventListener("click", (e) => {
   const menuBtn = e.target.closest(".card-menu-btn");
   if (menuBtn) {
-    e.stopPropagation();
+    e.stopPropagation(); // stop propagation of the event from child to parent
     const menu = menuBtn.nextElementSibling;
     const wasOpen = menu.classList.contains("open");
     closeAllMenus();
@@ -292,6 +277,3 @@ cardGrid.addEventListener("click", (e) => {
 document.addEventListener("click", closeAllMenus);
 
 loadCards();
-
-
-

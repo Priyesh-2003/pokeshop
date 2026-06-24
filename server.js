@@ -25,7 +25,11 @@ app.use(express.json());
 const cardRoutes = require('./backend/routes/cardRoutes');
 app.use('/api/cards', cardRoutes);
 
-// 4️⃣ Serve the frontend (Express automatically serves index.html at "/")
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'frontend', 'login.html'));
+});
+
+// 5️⃣ Serve all static frontend files
 app.use(express.static(path.join(__dirname, 'frontend')));
 
 // 5️⃣ Start the server
