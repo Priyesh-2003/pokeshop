@@ -1,5 +1,5 @@
 const API_URL = "/api/cards"; // relative path — works when Express serves this folder + the API on the same origin
-
+const token = localStorage.getItem("token");
 const form = document.getElementById("cardForm");
 const formTitle = document.getElementById("form-title");
 const submitBtn = document.getElementById("submitBtn");
@@ -56,6 +56,7 @@ function renderCards(cards) {
           </div>
 
           <button type="button" class="buy-btn" data-id="${card._id}">Buy now</button>
+          <button type="button" class="cart-btn" data-id="${card._id}">Add to Cart</button>
         </article>`;
     })
     .join("");
@@ -67,7 +68,13 @@ function closeAllMenus() {
 
 async function loadCards() {
   try {
-    const res = await fetch(API_URL);
+    const res = await fetch(API_URL,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }
+    );
     if (!res.ok) throw new Error(`Server responded with ${res.status}`);
     const cards = await res.json();
 
@@ -77,7 +84,14 @@ async function loadCards() {
     if (outOfStock.length) {
       await Promise.all(
         outOfStock.map((c) =>
-          fetch(`${API_URL}/${c._id}`, { method: "DELETE" }).catch(() => { })
+          fetch(`${API_URL}/${c._id}`, {
+            method: "DELETE", 
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`
+            },
+
+          }).catch(() => { })
         )
       );
     }
@@ -151,7 +165,10 @@ form.addEventListener("submit", async (e) => {
   try {
     const res = await fetch(url, {
       method,
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`
+      },
       body: JSON.stringify(payload)
     });
 
@@ -178,7 +195,13 @@ async function handleDelete(id, name) {
   setMessage(listMessage, "Deleting…", "");
 
   try {
-    const res = await fetch(`${API_URL}/${id}`, { method: "DELETE" });
+    const res = await fetch(`${API_URL}/${id}`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`
+      },
+    });
 
     if (!res.ok) {
       const errBody = await res.json().catch(() => ({}));
@@ -208,10 +231,19 @@ async function handleBuy(id, buyBtn) {
 
   try {
     const res = isLastOne
-      ? await fetch(`${API_URL}/${id}`, { method: "DELETE" })
+      ? await fetch(`${API_URL}/${id}`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
+        },
+      })
       : await fetch(`${API_URL}/${id}`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
+        },
         body: JSON.stringify({
           name: card.name,
           type: card.type,

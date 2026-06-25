@@ -2,10 +2,10 @@
 const express = require('express');
 const router = express.Router();
 const Card = require('../models/card');
-
+const verifyToken = require("../middleware/verifyToken");
 
 // POST /api/cards   →   add a new Pokémon card (requires login)
-router.post('/', async (req, res) => {
+router.post('/', verifyToken, async (req, res) => {
   try {
     const newCard = await Card.create(req.body);
     res.status(201).json(newCard);
@@ -16,7 +16,7 @@ router.post('/', async (req, res) => {
 });
 
 // PUT /api/cards/:id   →   update an existing card (requires login)
-router.put('/:id', async (req, res) => {
+router.put('/:id',verifyToken, async (req, res) => {
   try {
     const updatedCard = await Card.findByIdAndUpdate(
       req.params.id,
@@ -36,7 +36,7 @@ router.put('/:id', async (req, res) => {
 });
 
 // DELETE /api/cards/:id   →   remove a card (requires login)
-router.delete('/:id', async (req, res) => {
+router.delete('/:id',verifyToken, async (req, res) => {
   try {
     const deletedCard = await Card.findByIdAndDelete(req.params.id);
 
@@ -52,7 +52,7 @@ router.delete('/:id', async (req, res) => {
 });
 
 // GET /api/cards/:id   →   public, anyone can view a single card
-router.get('/:id', async (req, res) => {
+router.get('/:id',verifyToken, async (req, res) => {
   try {
     const card = await Card.findById(req.params.id);
 
@@ -67,7 +67,7 @@ router.get('/:id', async (req, res) => {
 });
 
 // GET /api/cards   →   public, anyone can browse the list
-router.get('/', async (req, res) => {
+router.get('/',verifyToken, async (req, res) => {
   try {
     const cards = await Card.find();
     res.json(cards);
