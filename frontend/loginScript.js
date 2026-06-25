@@ -18,11 +18,11 @@ registerBtn.addEventListener("click", async (e) => {
   const username = form.username.value.trim();
   const password = form.password.value;
 
- if (!username || !password) {
+  if (!username || !password) {
     setMessage("Username and password are required.", "error");
     return;
   }
-  submitBtn.disabled = true;
+  registerBtn.disabled = true;
   try {
     const res = await fetch("/api/auth/login", {
       method: "POST",
@@ -35,6 +35,7 @@ registerBtn.addEventListener("click", async (e) => {
       })
     });
 
+
     const data = await res.json();
 
     if (!res.ok) {
@@ -42,7 +43,7 @@ registerBtn.addEventListener("click", async (e) => {
     }
 
 
-
+    localStorage.setItem("token", data.token);
     setMessage("Signed in! Redirecting...", "success");
 
     setTimeout(() => {
@@ -52,7 +53,7 @@ registerBtn.addEventListener("click", async (e) => {
   } catch (err) {
     setMessage(err.message, "error");
   } finally {
-    submitBtn.disabled = false;
+    registerBtn.disabled = false;
   }
 
 })
@@ -90,10 +91,8 @@ submitBtn.addEventListener("click", async (e) => {
       throw new Error(data.message || "Login failed");
     }
 
-
-
     setMessage("Signed in! Redirecting...", "success");
-
+    localStorage.setItem("token", data.token);
     setTimeout(() => {
       window.location.href = "/index.html";
     }, 800);
