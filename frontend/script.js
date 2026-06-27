@@ -251,50 +251,9 @@ async function handleDelete(id, name) {
   }
 }
 
-// ===== Buy now =====
-// async function handleBuy(id, buyBtn) {
-//   const card = cardsCache.find((c) => c._id === id);
-//   if (!card || (card.stock ?? 0) <= 0) return;
-
-//   const newStock = (card.stock ?? 0) - 1;
-//   const originalLabel = buyBtn.textContent;
-
-//   buyBtn.disabled = true;
-//   buyBtn.textContent = "Buying…";
-
-//   try {
-//     const res = await fetch(`${API_URL}/${id}`, {
-//       method: "PUT",
-//       headers: {
-//         "Content-Type": "application/json",
-//         Authorization: `Bearer ${token}`
-//       },
-//       body: JSON.stringify({
-//         name: card.name,
-//         type: card.type,
-//         rarity: card.rarity,
-//         price: card.price,
-//         stock: newStock
-//       })
-//     });
-
-//     if (!res.ok) {
-//       const errBody = await res.json().catch(() => ({}));
-//       throw new Error(errBody.error || errBody.message || `Server responded with ${res.status}`);
-//     }
-
-//     setMessage(listMessage, `Bought 1× ${card.name}.`, "success");
-//     loadCards();
-//   } catch (err) {
-//     setMessage(listMessage, `Couldn't complete purchase: ${err.message}`, "error");
-//     buyBtn.disabled = false;
-//     buyBtn.textContent = originalLabel;
-//   }
-// }
 async function startPayment(cardId) {
   try {
     const card = cardsCache.find(c => c._id === cardId);
-    console.log("1. card found:", card);
     if (!card) return;
 
     const response = await fetch(`/api/payments/create-order`, {
@@ -305,10 +264,8 @@ async function startPayment(cardId) {
       },
       body: JSON.stringify({ amount: card.price })
     });
-    console.log("2. response status:", response.status);
 
     const order = await response.json();
-    console.log("3. order:", order);
 
     const options = {
       key: "rzp_test_T6KyRt4iuSs27s",
@@ -316,21 +273,38 @@ async function startPayment(cardId) {
       currency: order.currency,
       order_id: order.id,
       name: "Pokemon Store",
-      handler: function (response) {
-        console.log("4. payment success:", response);
+      handler: async function (response) {
+        // Called automatically by Razorpay after a successful payment.
+        // `response` contains:
+        // - razorpay_payment_id
+        // - razorpay_order_id
+        // - razorpay_signature
+        const verifyResponse = await fetch(`/api/payments/verify`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`
+          },
+          body: JSON.stringify(response)
+        });
+        const data = await verifyResponse.json();
+        console.log(data);  
+        // if(data.message === "Payment successful"){
+        //   setMessage(listMessage, "Payment successful", "success");
+        // }else{
+        //   setMessage(listMessage, "Payment failed", "error");
+        // }
+
       }
     };
 
     const rzp = new Razorpay(options);
-    console.log("5. rzp instance created");
     rzp.open();
-    console.log("6. rzp.open() called");
 
   } catch (err) {
     console.error("startPayment failed:", err);
   }
 }
-// Open Razorpay Checkout
 
 
 // ===== Cart: add / change quantity / remove =====
@@ -545,7 +519,7 @@ checkoutBtn.addEventListener("click", () => {
 
 // ===== Event delegation for kebab menu / edit / delete / buy / cart clicks on the grid =====
 cardGrid.addEventListener("click", (e) => {
-    console.log("grid clicked, target:", e.target);
+  console.log("grid clicked, target:", e.target);
   const menuBtn = e.target.closest(".card-menu-btn");
   if (menuBtn) {
     e.stopPropagation();

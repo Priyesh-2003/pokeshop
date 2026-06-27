@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-
+const crypto = require("crypto");
 const razorpay = require("../../config/razorPay");
 
 router.post("/create-order", async (req, res) => {
@@ -24,4 +24,27 @@ router.post("/create-order", async (req, res) => {
         res.status(500).send("Error creating order");
     }
 });
+router.post("/verify", async (req, res) => {
+    try {
+        const {
+            razorpay_payment_id,
+            razorpay_order_id,
+            razorpay_signature
+        } = req.body;
+
+        const generatedSignature = crypto
+            .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
+            .update(`${razorpay_order_id}|${razorpay_payment_id}`)
+            .digest("hex");
+
+        if (generatedSignature === razorpay_signature) {
+            res.json({ message: "Payment successful" });
+        } else {
+            res.status(400).send("Invalid payment signature");
+        }
+    } catch (error) {
+        console.log(error);
+        res.status(500).send("Error verifying payment");
+    }
+})
 module.exports = router;
