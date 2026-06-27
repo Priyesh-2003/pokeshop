@@ -29,6 +29,9 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'frontend', 'login.html'));
 });
 
+const payment = require('./backend/routes/paymentRoutes');
+app.use('/api/payments', payment);
+
 const authRoutes =
   require('./backend/routes/authRoutes');
 app.use('/api/auth', authRoutes);

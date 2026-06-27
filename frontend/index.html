@@ -16,6 +16,11 @@
 <body>
 
   <header class="site-header">
+    <button type="button" id="cartBtn" class="cart-icon-btn" aria-label="Open cart">
+      🛒
+      <span id="cartCount" class="cart-badge hidden">0</span>
+    </button>
+
     <p class="eyebrow">Inventory</p>
     <h1 class="headline">Poké<span class="accent">Shop</span></h1>
 
@@ -73,6 +78,28 @@
 
   </main>
 
+  <!-- CART -->
+  <div id="cartOverlay" class="cart-overlay"></div>
+  <aside id="cartDrawer" class="cart-drawer" aria-hidden="true" aria-labelledby="cart-title">
+    <div class="cart-drawer-header">
+      <h2 id="cart-title">Your cart</h2>
+      <button type="button" id="closeCartBtn" class="cart-close-btn" aria-label="Close cart">✕</button>
+    </div>
+
+    <div id="cartItems" class="cart-items">
+      <p class="empty-state">Your cart is empty.</p>
+    </div>
+
+    <div class="cart-drawer-footer">
+      <div class="cart-total-row">
+        <span>Total</span>
+        <span id="cartTotal">$0.00</span>
+      </div>
+      <button type="button" id="checkoutBtn" class="checkout-btn" disabled>Checkout</button>
+      <p id="cartMessage" class="form-message" role="status"></p>
+    </div>
+  </aside>
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
   <script src="script.js"></script>
 </body>
 
